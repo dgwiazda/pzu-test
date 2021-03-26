@@ -31,8 +31,18 @@ public class BooksController {
     }
 
     @GetMapping("/sort-title-asc")
-    public ResponseEntity<List<BooksEntity>> getALlBooksTitleasc() {
+    public ResponseEntity<List<BooksEntity>> getALlBooksTitleAsc() {
         return ResponseEntity.ok(booksRepository.findByOrderByTitleAsc());
+    }
+
+    @GetMapping("/sort-isbn-desc")
+    public ResponseEntity<List<BooksEntity>> getALlBooksIsbnDesc() {
+        return ResponseEntity.ok(booksRepository.findByOrderByIsbnDesc());
+    }
+
+    @GetMapping("/sort-isbn-asc")
+    public ResponseEntity<List<BooksEntity>> getALlBooksIsbnAsc() {
+        return ResponseEntity.ok(booksRepository.findByOrderByIsbnAsc());
     }
 
     @GetMapping("/{isbn}")

@@ -4,6 +4,8 @@ import styled from 'styled-components';
 
 import {Button, Table, Dropdown, Modal, Alert} from 'react-bootstrap';
 
+import {MdArrowDropDown, MdArrowDropUp} from 'react-icons/md'
+
 import axios from 'axios';
 
 const Styles = styled.div`
@@ -19,6 +21,10 @@ const Styles = styled.div`
     }
   }
   
+  #active {
+    text-decoration: underline;
+  }
+  
   #alert-div {
     display: flex;
     justify-content: center;
@@ -32,23 +38,23 @@ const Styles = styled.div`
     .table {
       width: 650px;
       position: relative;
-    
-      #sort-dropdown {
-        position: absolute;
-        top: -45px;
-        right: 0;
-      }
       
       #add-button {
         position: absolute;
+        width: 100px;
         top: -45px;
-        right: 100px;
+        right: 0px;
       }
       
       div.td-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
+        
+        button.sort-button {
+          border: none;
+          background-color: transparent;
+        }
       }
       
       #change-column {
@@ -71,6 +77,10 @@ function App() {
     const [newIsbn, setNewIsbn] = useState("");
     const [currentIsbn, setCurrentIsbn] = useState("");
     const [currentTitle, setCurrentTitle] = useState("");
+    const [sortTitleAsc, setSortTitleAsc] = useState(true);
+    const [sortIsbnAsc, setSortIsbnAsc] = useState(true);
+    const [sortByIsbn, setSortByIsbn] = useState(true);
+    const [sortByTitle, setSortByTitle] = useState(false);
 
 
     useEffect(() => {
@@ -90,6 +100,17 @@ function App() {
         })
     }
 
+    const sortBooksByIsbnAsc = () => {
+        axios.get("http://localhost:8080/api/books/sort-isbn-asc").then((response) => {
+            setBooks(response.data);
+        })
+    }
+    const sortBooksByIsbnDesc = () => {
+        axios.get("http://localhost:8080/api/books/sort-isbn-desc").then((response) => {
+            setBooks(response.data);
+        })
+    }
+
     const onChangeTitle = (e) => {
         setNewTitle(e.target.value);
     }
@@ -102,13 +123,13 @@ function App() {
         setShowEditModal(false);
         axios.put("http://localhost:8080/api/books/" + isbn + "?title=" + title).then(
             (response) => {
-            setShowMessage(true);
-            setMessage("Book title changed to " + response.data.title + "!");
-            setTimeout(() => {
-                setShowMessage(false);
-            }, 3000);
-            return Promise.resolve();
-        },
+                setShowMessage(true);
+                setMessage("Book title changed to " + response.data.title + "!");
+                setTimeout(() => {
+                    setShowMessage(false);
+                }, 3000);
+                return Promise.resolve();
+            },
             (error) => {
                 setShowMessage(true);
                 setMessage(error.response.data);
@@ -167,6 +188,25 @@ function App() {
             })
     }
 
+    const handleSortIsbn = () => {
+        setSortByTitle(false);
+        setSortByIsbn(true);
+        setSortIsbnAsc(!sortIsbnAsc);
+    }
+
+    const handleSortTitle = () => {
+        setSortByIsbn(false);
+        setSortByTitle(true);
+        setSortTitleAsc(!sortTitleAsc);
+    }
+
+    useEffect(() => {
+        sortIsbnAsc ? sortBooksByIsbnAsc() : sortBooksByIsbnDesc();
+    }, [sortIsbnAsc]);
+
+    useEffect(() => {
+        sortTitleAsc ? sortBooksByTitleAsc() : sortBooksByTitleDesc();
+    }, [sortTitleAsc]);
 
     return (
         <Styles>
@@ -224,25 +264,24 @@ function App() {
             </div>
             <div id="table-wrapper">
                 <Table striped bordered>
-                    <Dropdown id="sort-dropdown">
-                        <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                            Sort
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item onClick={sortBooksByTitleAsc}>ascending</Dropdown.Item>
-                            <Dropdown.Item onClick={sortBooksByTitleDesc}>descending</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
                     <Button id="add-button" variant="success" onClick={() => {
                         setShowAddModal(true)
                     }}>Add</Button>
                     <thead>
                     <tr>
-                        <th>
-                            <div className="td-wrapper">ISBN-10</div>
+                        <th className={sortIsbnAsc}>
+                            <div className="td-wrapper">
+                                <button className="sort-button" id={!sortByTitle ? "active" : ""}
+                                        onClick={handleSortIsbn}>ISBN-10 {sortIsbnAsc ? <MdArrowDropDown/> : <MdArrowDropUp/>}
+                                </button>
+                            </div>
                         </th>
                         <th>
-                            <div className="td-wrapper">Title</div>
+                            <div className="td-wrapper">
+                                <button className="sort-button" id={!sortByIsbn ? "active" : ""}
+                                        onClick={handleSortTitle}>Title {sortTitleAsc ? <MdArrowDropDown/> : <MdArrowDropUp/>}
+                                </button>
+                            </div>
                         </th>
                     </tr>
                     </thead>

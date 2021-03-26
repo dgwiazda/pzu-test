@@ -11,4 +11,6 @@ public interface BooksRepository extends JpaRepository<BooksEntity, String> {
 
     List<BooksEntity> findByOrderByTitleDesc();
     List<BooksEntity> findByOrderByTitleAsc();
+    List<BooksEntity> findByOrderByIsbnAsc();
+    List<BooksEntity> findByOrderByIsbnDesc();
 }
