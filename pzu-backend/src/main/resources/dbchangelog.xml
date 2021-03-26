@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet  id="1616676514_create_table_books"  author="dgwiazda">
+        <sql>
+            create table t_books
+            (
+                isbn varchar(12) not null,
+                title varchar(255) not null
+            );
+
+            create unique index t_books_isbn_uindex
+            on t_books (isbn);
+
+            alter table t_books
+            add constraint t_books_pk
+            primary key (isbn);
+        </sql>
+    </changeSet>
+
+    <changeSet  id="1616676514_add_values_table_books"  author="dgwiazda">
+        <sql>
+            INSERT INTO
+            t_books (isbn, title)
+            VALUES
+            ('1-1234-12345', 'Harry Potter'),
+            ('2-2345-23456', 'Lord of the rings'),
+            ('3-3456-34567', 'The Witcher');
+        </sql>
+    </changeSet>
+</databaseChangeLog>
