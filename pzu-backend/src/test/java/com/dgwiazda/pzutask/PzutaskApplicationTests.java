@@ -1,13 +1,45 @@
 package com.dgwiazda.pzutask;
 
+import com.dgwiazda.pzutask.persistence.repository.BooksRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.Collections;
+
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@WebMvcTest
 class PzutaskApplicationTests {
 
+    @Autowired
+    MockMvc mockMvc;
+
+    @MockBean
+    BooksRepository booksRepository;
+
     @Test
-    void contextLoads() {
+    void contextLoads() throws Exception {
+
+        when(booksRepository.findAll()).thenReturn(
+                Collections.emptyList()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/books")
+                .accept(MediaType.APPLICATION_JSON)
+        ).andReturn();
+
+        System.out.println(mvcResult.getResponse());
+
+        verify(booksRepository.findAll());
     }
 
 }

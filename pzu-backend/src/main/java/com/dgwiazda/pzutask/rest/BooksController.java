@@ -1,102 +1,53 @@
 package com.dgwiazda.pzutask.rest;
 
 import com.dgwiazda.pzutask.persistence.model.BooksEntity;
-import com.dgwiazda.pzutask.services.repository.BooksRepository;
+import com.dgwiazda.pzutask.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.regex.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/books")
+@RequestMapping("/books")
 @CrossOrigin(origins = "*")
 public class BooksController {
 
-    private BooksRepository booksRepository;
+    private BookService bookService;
 
-    public BooksController(BooksRepository booksRepository) {
-        this.booksRepository = booksRepository;
+    public BooksController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @GetMapping
-    public ResponseEntity<List<BooksEntity>> getALlBooks() {
-        return ResponseEntity.ok(booksRepository.findAll());
-    }
+    public ResponseEntity<List<BooksEntity>> getAllBooks(
+            @RequestParam(required = false) String param,
+            @RequestParam(required = false) String sort) {
 
-    @GetMapping("/sort-title-desc")
-    public ResponseEntity<List<BooksEntity>> getALlBooksTitleDesc() {
-        return ResponseEntity.ok(booksRepository.findByOrderByTitleDesc());
-    }
-
-    @GetMapping("/sort-title-asc")
-    public ResponseEntity<List<BooksEntity>> getALlBooksTitleAsc() {
-        return ResponseEntity.ok(booksRepository.findByOrderByTitleAsc());
-    }
-
-    @GetMapping("/sort-isbn-desc")
-    public ResponseEntity<List<BooksEntity>> getALlBooksIsbnDesc() {
-        return ResponseEntity.ok(booksRepository.findByOrderByIsbnDesc());
-    }
-
-    @GetMapping("/sort-isbn-asc")
-    public ResponseEntity<List<BooksEntity>> getALlBooksIsbnAsc() {
-        return ResponseEntity.ok(booksRepository.findByOrderByIsbnAsc());
+        List<BooksEntity> books = bookService.find(param, sort);
+        return ResponseEntity.ok(books);
     }
 
     @GetMapping("/{isbn}")
     public ResponseEntity<?> getBookById(@PathVariable String isbn) {
-        if (!Pattern.matches("\\d-\\d{4}-\\d{5}", isbn)) {
-            return ResponseEntity.badRequest().body("ISBN number is not valid! It should contains only digits and looks like x-xxxx-xxxxx");
-        } else {
-            if (booksRepository.findById(isbn).isEmpty()) {
-                return ResponseEntity.badRequest().body("Book with this ISBN number doesn't exist!");
-            } else {
-                return ResponseEntity.ok(booksRepository.findById(isbn).get());
-            }
-        }
+        BooksEntity book = bookService.getBookByIsbn(isbn);
+        return ResponseEntity.ok(book);
     }
 
     @PostMapping
-    public ResponseEntity<?> addBook(@RequestBody BooksEntity booksEntity) {
-        if (!Pattern.matches("\\d-\\d{4}-\\d{5}", booksEntity.getIsbn())) {
-            return ResponseEntity.badRequest().body("ISBN number is not valid! It should contains only digits and looks like x-xxxx-xxxxx");
-        } else {
-            if (booksRepository.findById(booksEntity.getIsbn()).isEmpty()) {
-                return ResponseEntity.ok(booksRepository.save(booksEntity));
-            } else {
-                return ResponseEntity.badRequest().body("Book with this ISBN number already exist!");
-            }
-        }
+    public ResponseEntity<BooksEntity> addBook(@RequestBody BooksEntity booksEntity) {
+        BooksEntity booksEntity1 = bookService.addBook(booksEntity);
+        return ResponseEntity.ok(booksEntity1);
     }
 
     @PutMapping("/{isbn}")
     public ResponseEntity<?> editBook(@PathVariable String isbn, @RequestParam String title) {
-        if (!Pattern.matches("\\d-\\d{4}-\\d{5}", isbn)) {
-            return ResponseEntity.badRequest().body("ISBN number is not valid! It should contains only digits and looks like x-xxxx-xxxxx");
-        } else {
-            if (booksRepository.findById(isbn).isEmpty()) {
-                return ResponseEntity.badRequest().body("Book with this ISBN number doesn't exist!");
-            } else {
-                BooksEntity booksEntity = booksRepository.findById(isbn).get();
-                booksEntity.setTitle(title);
-                return ResponseEntity.ok(booksRepository.save(booksEntity));
-            }
-        }
+        BooksEntity booksEntity = bookService.editBook(isbn, title);
+        return ResponseEntity.ok(booksEntity);
     }
 
     @DeleteMapping("/{isbn}")
     public ResponseEntity<String> deleteBook(@PathVariable String isbn) {
-        if (!Pattern.matches("\\d-\\d{4}-\\d{5}", isbn)) {
-            return ResponseEntity.badRequest().body("ISBN number is not valid! It should contains only digits and looks like x-xxxx-xxxxx");
-        } else {
-            if (booksRepository.findById(isbn).isEmpty()) {
-                return ResponseEntity.badRequest().body("Book with this ISBN number doesn't exist!");
-            } else {
-                booksRepository.deleteById(isbn);
-                return ResponseEntity.ok("Usunięto książkę o isbn: " + isbn);
-            }
-        }
+        bookService.deleteBook(isbn);
+        return ResponseEntity.ok("Book deleted!");
     }
 }

@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -25,6 +26,20 @@ public class BooksEntity {
     public BooksEntity(String isbn, String title) {
         this.isbn = isbn;
         this.title = title;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BooksEntity that = (BooksEntity) o;
+        return Objects.equals(isbn, that.isbn) &&
+                Objects.equals(title, that.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isbn, title);
     }
 
     @Override

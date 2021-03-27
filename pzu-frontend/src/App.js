@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 
 import styled from 'styled-components';
 
-import {Button, Table, Dropdown, Modal, Alert} from 'react-bootstrap';
+import {Button, Table, Modal, Alert} from 'react-bootstrap';
 
 import {MdArrowDropDown, MdArrowDropUp} from 'react-icons/md'
 
@@ -81,6 +81,7 @@ function App() {
     const [sortIsbnAsc, setSortIsbnAsc] = useState(true);
     const [sortByIsbn, setSortByIsbn] = useState(true);
     const [sortByTitle, setSortByTitle] = useState(false);
+    const [succesMessage, setSuccesMessage] = useState(false);
 
 
     useEffect(() => {
@@ -90,23 +91,23 @@ function App() {
     }, [message])
 
     const sortBooksByTitleAsc = () => {
-        axios.get("http://localhost:8080/api/books/sort-title-asc").then((response) => {
+        axios.get("http://localhost:8080/api/books?param=title&sort=asc").then((response) => {
             setBooks(response.data);
         })
     }
     const sortBooksByTitleDesc = () => {
-        axios.get("http://localhost:8080/api/books/sort-title-desc").then((response) => {
+        axios.get("http://localhost:8080/api/books?param=title&sort=desc").then((response) => {
             setBooks(response.data);
         })
     }
 
     const sortBooksByIsbnAsc = () => {
-        axios.get("http://localhost:8080/api/books/sort-isbn-asc").then((response) => {
+        axios.get("http://localhost:8080/api/books?param=isbn&sort=asc").then((response) => {
             setBooks(response.data);
         })
     }
     const sortBooksByIsbnDesc = () => {
-        axios.get("http://localhost:8080/api/books/sort-isbn-desc").then((response) => {
+        axios.get("http://localhost:8080/api/books?param=isbn&sort=desc").then((response) => {
             setBooks(response.data);
         })
     }
@@ -123,6 +124,7 @@ function App() {
         setShowEditModal(false);
         axios.put("http://localhost:8080/api/books/" + isbn + "?title=" + title).then(
             (response) => {
+                setSuccesMessage(true);
                 setShowMessage(true);
                 setMessage("Book title changed to " + response.data.title + "!");
                 setTimeout(() => {
@@ -131,8 +133,9 @@ function App() {
                 return Promise.resolve();
             },
             (error) => {
+                setSuccesMessage(false);
                 setShowMessage(true);
-                setMessage(error.response.data);
+                setMessage(error.response.data.message);
                 setTimeout(() => {
                     setShowMessage(false);
                 }, 3000);
@@ -145,6 +148,7 @@ function App() {
     const deleteBook = (isbn) => {
         axios.delete("http://localhost:8080/api/books/" + isbn).then(
             (response) => {
+                setSuccesMessage(true);
                 setShowMessage(true);
                 setMessage(response.data);
                 setTimeout(() => {
@@ -153,8 +157,9 @@ function App() {
                 return Promise.resolve();
             },
             (error) => {
+                setSuccesMessage(false);
                 setShowMessage(true);
-                setMessage(error.response.data);
+                setMessage(error.response.data.message);
                 setTimeout(() => {
                     setShowMessage(false);
                 }, 3000);
@@ -169,6 +174,7 @@ function App() {
         }
         axios.post("http://localhost:8080/api/books", data).then(
             (response) => {
+                setSuccesMessage(true);
                 setShowAddModal(false);
                 setShowMessage(true);
                 setMessage("Book with ISBN = " + response.data.isbn + " and title = " + response.data.title + " added successful!");
@@ -178,9 +184,10 @@ function App() {
                 return Promise.resolve();
             },
             (error) => {
+                setSuccesMessage(false);
                 setShowAddModal(false);
                 setShowMessage(true);
-                setMessage(error.response.data);
+                setMessage(error.response.data.message);
                 setTimeout(() => {
                     setShowMessage(false);
                 }, 3000);
@@ -260,7 +267,7 @@ function App() {
                 </Modal.Footer>
             </Modal>
             <div id="alert-div">
-                <Alert variant="success" show={showMessage}>{message}</Alert>
+                <Alert variant={succesMessage ? "success" : "danger"} show={showMessage}>{message}</Alert>
             </div>
             <div id="table-wrapper">
                 <Table striped bordered>
